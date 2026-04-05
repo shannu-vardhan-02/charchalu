@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import express from "express";
+import jwt from "jsonwebtoken";
 
 export const generateToken = (user, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
