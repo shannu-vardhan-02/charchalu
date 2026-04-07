@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
+import { sendWelcomeEmail } from "../emails/email.handler.js";
+import { ENV } from "../lib/env.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -34,30 +36,31 @@ export const signup = async (req, res) => {
       password: hashedPassword,
     });
 
-    await newUser.save();
-    generateToken(newUser._id, res);
-    return res.status(201).json({
-      message: "User created successfully",
-      _id: newUser._id,
-      fullName: newUser.fullName,
-      email: newUser.email,
-      profilePic: newUser.profilePic,
-    });
-      return res.status(201).json({
+    if (newUser) {
+      await newUser.save();
+      generateToken(newUser._id, res);
+      res.status(201).json({
         message: "User created successfully",
         _id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
         profilePic: newUser.profilePic,
       });
-    }
 
-    // todo : send a welcome email to the user after successful signup using nodemailer
+      // send a welcome email to the user after successful signup using nodemailer
+
+      try {
+        await sendWelcomeEmail(newUser.email, newUser.fullName, ENV.CLIENT_URL);
+      } catch (error) {
+        console.error("Error sending welcome email:", error);
+      }
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    }
   } catch (error) {
     console.error("SIGNUP ERROR : ", error);
     return res.status(500).json({ message: "Server error" });
   }
-  res.send("Signup endpoint");
 };
 export const login = async (req, res) => {
   res.send("Login endpoint");
