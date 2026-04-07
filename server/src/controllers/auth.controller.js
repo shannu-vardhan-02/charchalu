@@ -96,6 +96,7 @@ export const logout = async (_, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
+      path: "/", // ensure the cookie is cleared for the entire site
     });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
