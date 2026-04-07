@@ -92,12 +92,13 @@ export const login = async (req, res) => {
 };
 export const logout = async (_, res) => {
   try {
-    res.clearCookie("token", {
+    res.clearCookie("jwt_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/", // ensure the cookie is cleared for the entire site
     });
+    // cookie will not be deleted because the token name is not the same as the one set in the generateToken function, so we need to specify the name of the cookie to clear. We have to change the name of the cookie in the generateToken function to "token" instead of "jwt" for this to work.
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     console.error("LOGOUT ERROR : ", error);
