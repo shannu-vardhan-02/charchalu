@@ -8,7 +8,7 @@ export const generateToken = (user, res) => {
 
   // for this res to work we need to import express
 
-  res.cookie("jwt", token, {
+  res.cookie("jwt_token", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     httpOnly: true, // this will prevent the cookie from being accessed by client-side JavaScript for security reasons
     secure: ENV.NODE_ENV === "development" ? false : true, // this will ensure that the cookie is only sent over HTTPS in production for security reasons
