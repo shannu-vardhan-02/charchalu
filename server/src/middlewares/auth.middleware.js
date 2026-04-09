@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import { ENV } from "../lib/env.js";
 
-export const protectRoute = (req, res, next) => {
+export const protectRoute = async (req, res, next) => {
   const token = req.cookies.jwt_token;
   if (!token) {
     return res.status(401).json({ message: "Unauthorized, no token provided" });
@@ -14,7 +14,7 @@ export const protectRoute = (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized, invalid token" });
     }
 
-    const user = User.findById(decoded.id).select("-password"); // Fetch the user from the database using the ID from the token, excluding the password field
+    const user = await User.findById(decoded.id).select("-password"); // Fetch the user from the database using the ID from the token, excluding the password field
     if (!user) {
       return res.status(401).json({ message: "Unauthorized, user not found" });
     }
