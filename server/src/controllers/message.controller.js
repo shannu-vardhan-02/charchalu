@@ -1,8 +1,7 @@
 import Message from "../models/message.model.js";
 import User from "../models/user.model.js";
+import cloudinary from "../lib/cloudinary.js";
 
-// fetch all users except the logged-in user to show as contacts in the chat sidebar
-// route : GET /api/messages/contacts
 export const getAllContacts = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
@@ -35,7 +34,6 @@ export const getMessagesByUserId = async (req, res) => {
       ],
     }).sort({ createdAt: 1 }); // Sort messages by creation time (oldest first)
     res.status(200).json(messages);
-    ``;
   } catch (error) {
     console.log("Error fetching messages:", error);
     res.status(500).json({ message: "Server Error" });
@@ -49,6 +47,19 @@ export const sendMessage = async (req, res) => {
     const { text, image } = req.body;
     const senderId = req.user._id;
     const { id: receiverId } = req.params;
+
+    // Validate receiver exists
+    const receiver = await User.findById(receiverId);
+    if (!receiver) {
+      return res.status(404).json({ message: "Recipient not found" });
+    }
+
+    // Ensure message has content
+    if (!text && !image) {
+      return res
+        .status(400)
+        .json({ message: "Message must have text or image" });
+    }
 
     let imageUrl;
     if (image) {
