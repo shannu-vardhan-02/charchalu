@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
@@ -13,6 +14,7 @@ const PORT = ENV.PORT || 3000;
 
 app.use(express.json()); // req.body will be undefined without this middleware
 // req.body will contain the parsed JSON data sent by the client in the request body which is used in the signup and login controllers to get the user data for authentication and registration
+app.use(cookieParser()); // to parse the cookies sent by the client in the request headers, which is used in the protectRoute middleware to get the token from the cookies for authentication
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);

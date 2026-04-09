@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import { sendWelcomeEmail } from "../emails/email.handler.js";
 import { ENV } from "../lib/env.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -98,10 +99,32 @@ export const logout = async (_, res) => {
       sameSite: "strict",
       path: "/", // ensure the cookie is cleared for the entire site
     });
-    // cookie will not be deleted because the token name is not the same as the one set in the generateToken function, so we need to specify the name of the cookie to clear. We have to change the name of the cookie in the generateToken function to "token" instead of "jwt" for this to work.
+    // cookie will not be deleted if the token name is not the same as the one set in the generateToken function, so we need to specify the name of the cookie to clear. We have to put the name of the cookie in the generateToken function as same for it to work.
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     console.error("LOGOUT ERROR : ", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile picture is required" });
+    }
+
+    const userId = req.user._id;
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true },
+    );
+    res
+      .status(200)
+      .json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("UPDATE PROFILE ERROR : ", error);
     res.status(500).json({ message: "Server error" });
   }
 };
